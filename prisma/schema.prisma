@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Question {
+  id String @id @default(uuid())
+
+  text        String
+  explanation String
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  options Option[]
+  answers Answer[]
+}
+
+model Option {
+  id         String @id @default(uuid())
+  questionId String
+
+  text      String
+  isCorrect Boolean
+
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+model QuizAttempt {
+  id String @id @default(uuid())
+
+  name     String
+  district String
+
+  score      Int
+  percentage Float
+  passed     Boolean
+
+  createdAt DateTime @default(now())
+
+  answers     Answer[]
+  certificate Certificate?
+}
+
+model Answer {
+  id String @id @default(uuid())
+
+  attemptId  String
+  questionId String
+  optionId   String
+
+  isCorrect Boolean
+
+  attempt  QuizAttempt @relation(fields: [attemptId], references: [id])
+  question Question    @relation(fields: [questionId], references: [id])
+}
+
+model Certificate {
+  id        String @id @default(uuid())
+  attemptId String @unique
+
+  filePath  String
+  createdAt DateTime @default(now())
+
+  attempt QuizAttempt @relation(fields: [attemptId], references: [id])
+}
