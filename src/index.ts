@@ -15,7 +15,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: true,
+      origin: [
+      "https://www.votekori.cloud",
+      "https://admin.votekori.cloud",
+      "http://localhost:3000",
+      "http://localhost:3001",
+    ],
     credentials: true,
   })
 );
