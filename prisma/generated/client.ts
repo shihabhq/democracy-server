@@ -64,3 +64,8 @@ export type Answer = Prisma.AnswerModel
  * 
  */
 export type Certificate = Prisma.CertificateModel
+/**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
