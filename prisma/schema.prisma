@@ -74,3 +74,13 @@ model Certificate {
 
   attempt QuizAttempt @relation(fields: [attemptId], references: [id])
 }
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive Boolean @default(true)
+}
