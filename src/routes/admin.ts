@@ -3,6 +3,37 @@ import prisma from "../lib/prisma.js";
 
 const router = express.Router();
 
+// Get quiz attempts (with optional filters by district and ageGroup)
+router.get("/attempts", async (req, res) => {
+  try {
+    const { district, ageGroup } = req.query;
+
+    const where: { district?: string; ageGroup?: string } = {};
+    if (typeof district === "string" && district) where.district = district;
+    if (typeof ageGroup === "string" && ageGroup) where.ageGroup = ageGroup;
+
+    const attempts = await prisma.quizAttempt.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        district: true,
+        ageGroup: true,
+        score: true,
+        percentage: true,
+        passed: true,
+        createdAt: true,
+      },
+    });
+
+    res.json(attempts);
+  } catch (error) {
+    console.error("Error fetching attempts:", error);
+    res.status(500).json({ error: "Failed to fetch attempts" });
+  }
+});
+
 // Get all questions (for admin)
 router.get("/questions", async (req, res) => {
   try {

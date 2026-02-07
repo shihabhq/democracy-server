@@ -90,6 +90,49 @@ router.get("/", async (req, res) => {
     const toughestQuestions = sortedBySuccess.slice(0, 10).reverse(); // Lowest success rate first
     const easiestQuestions = sortedBySuccess.slice(-10).reverse(); // Highest success rate first
 
+    // Stats by district
+    const attemptsByDistrict = await prisma.quizAttempt.groupBy({
+      by: ["district"],
+      _count: { id: true },
+      _sum: { score: true },
+      _avg: { percentage: true },
+    });
+    const passedByDistrict = await prisma.quizAttempt.groupBy({
+      by: ["district"],
+      where: { passed: true },
+      _count: { id: true },
+    });
+    const passedByDistrictMap = new Map(
+      passedByDistrict.map((p) => [p.district, p._count.id])
+    );
+    const statsByDistrict = attemptsByDistrict.map((row) => ({
+      district: row.district,
+      totalAttempts: row._count.id,
+      passedCount: passedByDistrictMap.get(row.district) ?? 0,
+      averageScore: Math.round((row._avg.percentage ?? 0) * 100) / 100,
+    }));
+
+    // Stats by age group
+    const attemptsByAgeGroup = await prisma.quizAttempt.groupBy({
+      by: ["ageGroup"],
+      _count: { id: true },
+      _avg: { percentage: true },
+    });
+    const passedByAgeGroup = await prisma.quizAttempt.groupBy({
+      by: ["ageGroup"],
+      where: { passed: true },
+      _count: { id: true },
+    });
+    const passedByAgeGroupMap = new Map(
+      passedByAgeGroup.map((p) => [p.ageGroup, p._count.id])
+    );
+    const statsByAgeGroup = attemptsByAgeGroup.map((row) => ({
+      ageGroup: row.ageGroup,
+      totalAttempts: row._count.id,
+      passedCount: passedByAgeGroupMap.get(row.ageGroup) ?? 0,
+      averageScore: Math.round((row._avg.percentage ?? 0) * 100) / 100,
+    }));
+
     res.json({
       totalAttempts,
       passedCount,
@@ -99,6 +142,8 @@ router.get("/", async (req, res) => {
       totalAnswers,
       toughestQuestions,
       easiestQuestions,
+      statsByDistrict,
+      statsByAgeGroup,
     });
   } catch (error) {
     console.error("Error fetching analytics:", error);

@@ -40,6 +40,7 @@ export type QuizAttemptMinAggregateOutputType = {
   id: string | null
   name: string | null
   district: string | null
+  ageGroup: string | null
   score: number | null
   percentage: number | null
   passed: boolean | null
@@ -50,6 +51,7 @@ export type QuizAttemptMaxAggregateOutputType = {
   id: string | null
   name: string | null
   district: string | null
+  ageGroup: string | null
   score: number | null
   percentage: number | null
   passed: boolean | null
@@ -60,6 +62,7 @@ export type QuizAttemptCountAggregateOutputType = {
   id: number
   name: number
   district: number
+  ageGroup: number
   score: number
   percentage: number
   passed: number
@@ -82,6 +85,7 @@ export type QuizAttemptMinAggregateInputType = {
   id?: true
   name?: true
   district?: true
+  ageGroup?: true
   score?: true
   percentage?: true
   passed?: true
@@ -92,6 +96,7 @@ export type QuizAttemptMaxAggregateInputType = {
   id?: true
   name?: true
   district?: true
+  ageGroup?: true
   score?: true
   percentage?: true
   passed?: true
@@ -102,6 +107,7 @@ export type QuizAttemptCountAggregateInputType = {
   id?: true
   name?: true
   district?: true
+  ageGroup?: true
   score?: true
   percentage?: true
   passed?: true
@@ -199,6 +205,7 @@ export type QuizAttemptGroupByOutputType = {
   id: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -232,6 +239,7 @@ export type QuizAttemptWhereInput = {
   id?: Prisma.StringFilter<"QuizAttempt"> | string
   name?: Prisma.StringFilter<"QuizAttempt"> | string
   district?: Prisma.StringFilter<"QuizAttempt"> | string
+  ageGroup?: Prisma.StringFilter<"QuizAttempt"> | string
   score?: Prisma.IntFilter<"QuizAttempt"> | number
   percentage?: Prisma.FloatFilter<"QuizAttempt"> | number
   passed?: Prisma.BoolFilter<"QuizAttempt"> | boolean
@@ -244,6 +252,7 @@ export type QuizAttemptOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   district?: Prisma.SortOrder
+  ageGroup?: Prisma.SortOrder
   score?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   passed?: Prisma.SortOrder
@@ -259,6 +268,7 @@ export type QuizAttemptWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.QuizAttemptWhereInput | Prisma.QuizAttemptWhereInput[]
   name?: Prisma.StringFilter<"QuizAttempt"> | string
   district?: Prisma.StringFilter<"QuizAttempt"> | string
+  ageGroup?: Prisma.StringFilter<"QuizAttempt"> | string
   score?: Prisma.IntFilter<"QuizAttempt"> | number
   percentage?: Prisma.FloatFilter<"QuizAttempt"> | number
   passed?: Prisma.BoolFilter<"QuizAttempt"> | boolean
@@ -271,6 +281,7 @@ export type QuizAttemptOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   district?: Prisma.SortOrder
+  ageGroup?: Prisma.SortOrder
   score?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   passed?: Prisma.SortOrder
@@ -289,6 +300,7 @@ export type QuizAttemptScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"QuizAttempt"> | string
   name?: Prisma.StringWithAggregatesFilter<"QuizAttempt"> | string
   district?: Prisma.StringWithAggregatesFilter<"QuizAttempt"> | string
+  ageGroup?: Prisma.StringWithAggregatesFilter<"QuizAttempt"> | string
   score?: Prisma.IntWithAggregatesFilter<"QuizAttempt"> | number
   percentage?: Prisma.FloatWithAggregatesFilter<"QuizAttempt"> | number
   passed?: Prisma.BoolWithAggregatesFilter<"QuizAttempt"> | boolean
@@ -299,6 +311,7 @@ export type QuizAttemptCreateInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -311,6 +324,7 @@ export type QuizAttemptUncheckedCreateInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -323,6 +337,7 @@ export type QuizAttemptUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -335,6 +350,7 @@ export type QuizAttemptUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -347,6 +363,7 @@ export type QuizAttemptCreateManyInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -357,6 +374,7 @@ export type QuizAttemptUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -367,6 +385,7 @@ export type QuizAttemptUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -377,6 +396,7 @@ export type QuizAttemptCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   district?: Prisma.SortOrder
+  ageGroup?: Prisma.SortOrder
   score?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   passed?: Prisma.SortOrder
@@ -392,6 +412,7 @@ export type QuizAttemptMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   district?: Prisma.SortOrder
+  ageGroup?: Prisma.SortOrder
   score?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   passed?: Prisma.SortOrder
@@ -402,6 +423,7 @@ export type QuizAttemptMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   district?: Prisma.SortOrder
+  ageGroup?: Prisma.SortOrder
   score?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   passed?: Prisma.SortOrder
@@ -466,6 +488,7 @@ export type QuizAttemptCreateWithoutAnswersInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -477,6 +500,7 @@ export type QuizAttemptUncheckedCreateWithoutAnswersInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -504,6 +528,7 @@ export type QuizAttemptUpdateWithoutAnswersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -515,6 +540,7 @@ export type QuizAttemptUncheckedUpdateWithoutAnswersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -526,6 +552,7 @@ export type QuizAttemptCreateWithoutCertificateInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -537,6 +564,7 @@ export type QuizAttemptUncheckedCreateWithoutCertificateInput = {
   id?: string
   name: string
   district: string
+  ageGroup: string
   score: number
   percentage: number
   passed: boolean
@@ -564,6 +592,7 @@ export type QuizAttemptUpdateWithoutCertificateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -575,6 +604,7 @@ export type QuizAttemptUncheckedUpdateWithoutCertificateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   district?: Prisma.StringFieldUpdateOperationsInput | string
+  ageGroup?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   percentage?: Prisma.FloatFieldUpdateOperationsInput | number
   passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -617,6 +647,7 @@ export type QuizAttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   name?: boolean
   district?: boolean
+  ageGroup?: boolean
   score?: boolean
   percentage?: boolean
   passed?: boolean
@@ -630,6 +661,7 @@ export type QuizAttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   district?: boolean
+  ageGroup?: boolean
   score?: boolean
   percentage?: boolean
   passed?: boolean
@@ -640,6 +672,7 @@ export type QuizAttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   name?: boolean
   district?: boolean
+  ageGroup?: boolean
   score?: boolean
   percentage?: boolean
   passed?: boolean
@@ -650,13 +683,14 @@ export type QuizAttemptSelectScalar = {
   id?: boolean
   name?: boolean
   district?: boolean
+  ageGroup?: boolean
   score?: boolean
   percentage?: boolean
   passed?: boolean
   createdAt?: boolean
 }
 
-export type QuizAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "district" | "score" | "percentage" | "passed" | "createdAt", ExtArgs["result"]["quizAttempt"]>
+export type QuizAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "district" | "ageGroup" | "score" | "percentage" | "passed" | "createdAt", ExtArgs["result"]["quizAttempt"]>
 export type QuizAttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   answers?: boolean | Prisma.QuizAttempt$answersArgs<ExtArgs>
   certificate?: boolean | Prisma.QuizAttempt$certificateArgs<ExtArgs>
@@ -675,6 +709,7 @@ export type $QuizAttemptPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     name: string
     district: string
+    ageGroup: string
     score: number
     percentage: number
     passed: boolean
@@ -1107,6 +1142,7 @@ export interface QuizAttemptFieldRefs {
   readonly id: Prisma.FieldRef<"QuizAttempt", 'String'>
   readonly name: Prisma.FieldRef<"QuizAttempt", 'String'>
   readonly district: Prisma.FieldRef<"QuizAttempt", 'String'>
+  readonly ageGroup: Prisma.FieldRef<"QuizAttempt", 'String'>
   readonly score: Prisma.FieldRef<"QuizAttempt", 'Int'>
   readonly percentage: Prisma.FieldRef<"QuizAttempt", 'Float'>
   readonly passed: Prisma.FieldRef<"QuizAttempt", 'Boolean'>
