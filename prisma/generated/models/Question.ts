@@ -150,7 +150,7 @@ export type QuestionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type QuestionGroupByOutputType = {
   id: string
   text: string
-  explanation: string
+  explanation: string | null
   isActive: boolean
   createdAt: Date
   _count: QuestionCountAggregateOutputType | null
@@ -179,7 +179,7 @@ export type QuestionWhereInput = {
   NOT?: Prisma.QuestionWhereInput | Prisma.QuestionWhereInput[]
   id?: Prisma.StringFilter<"Question"> | string
   text?: Prisma.StringFilter<"Question"> | string
-  explanation?: Prisma.StringFilter<"Question"> | string
+  explanation?: Prisma.StringNullableFilter<"Question"> | string | null
   isActive?: Prisma.BoolFilter<"Question"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Question"> | Date | string
   options?: Prisma.OptionListRelationFilter
@@ -189,7 +189,7 @@ export type QuestionWhereInput = {
 export type QuestionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   text?: Prisma.SortOrder
-  explanation?: Prisma.SortOrder
+  explanation?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   options?: Prisma.OptionOrderByRelationAggregateInput
@@ -202,7 +202,7 @@ export type QuestionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.QuestionWhereInput[]
   NOT?: Prisma.QuestionWhereInput | Prisma.QuestionWhereInput[]
   text?: Prisma.StringFilter<"Question"> | string
-  explanation?: Prisma.StringFilter<"Question"> | string
+  explanation?: Prisma.StringNullableFilter<"Question"> | string | null
   isActive?: Prisma.BoolFilter<"Question"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Question"> | Date | string
   options?: Prisma.OptionListRelationFilter
@@ -212,7 +212,7 @@ export type QuestionWhereUniqueInput = Prisma.AtLeast<{
 export type QuestionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   text?: Prisma.SortOrder
-  explanation?: Prisma.SortOrder
+  explanation?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.QuestionCountOrderByAggregateInput
@@ -226,7 +226,7 @@ export type QuestionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.QuestionScalarWhereWithAggregatesInput | Prisma.QuestionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Question"> | string
   text?: Prisma.StringWithAggregatesFilter<"Question"> | string
-  explanation?: Prisma.StringWithAggregatesFilter<"Question"> | string
+  explanation?: Prisma.StringNullableWithAggregatesFilter<"Question"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Question"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Question"> | Date | string
 }
@@ -234,7 +234,7 @@ export type QuestionScalarWhereWithAggregatesInput = {
 export type QuestionCreateInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   options?: Prisma.OptionCreateNestedManyWithoutQuestionInput
@@ -244,7 +244,7 @@ export type QuestionCreateInput = {
 export type QuestionUncheckedCreateInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   options?: Prisma.OptionUncheckedCreateNestedManyWithoutQuestionInput
@@ -254,7 +254,7 @@ export type QuestionUncheckedCreateInput = {
 export type QuestionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.OptionUpdateManyWithoutQuestionNestedInput
@@ -264,7 +264,7 @@ export type QuestionUpdateInput = {
 export type QuestionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.OptionUncheckedUpdateManyWithoutQuestionNestedInput
@@ -274,7 +274,7 @@ export type QuestionUncheckedUpdateInput = {
 export type QuestionCreateManyInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
 }
@@ -282,7 +282,7 @@ export type QuestionCreateManyInput = {
 export type QuestionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -290,7 +290,7 @@ export type QuestionUpdateManyMutationInput = {
 export type QuestionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -326,6 +326,10 @@ export type QuestionScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type BoolFieldUpdateOperationsInput = {
@@ -367,7 +371,7 @@ export type QuestionUpdateOneRequiredWithoutAnswersNestedInput = {
 export type QuestionCreateWithoutOptionsInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   answers?: Prisma.AnswerCreateNestedManyWithoutQuestionInput
@@ -376,7 +380,7 @@ export type QuestionCreateWithoutOptionsInput = {
 export type QuestionUncheckedCreateWithoutOptionsInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutQuestionInput
@@ -401,7 +405,7 @@ export type QuestionUpdateToOneWithWhereWithoutOptionsInput = {
 export type QuestionUpdateWithoutOptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   answers?: Prisma.AnswerUpdateManyWithoutQuestionNestedInput
@@ -410,7 +414,7 @@ export type QuestionUpdateWithoutOptionsInput = {
 export type QuestionUncheckedUpdateWithoutOptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutQuestionNestedInput
@@ -419,7 +423,7 @@ export type QuestionUncheckedUpdateWithoutOptionsInput = {
 export type QuestionCreateWithoutAnswersInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   options?: Prisma.OptionCreateNestedManyWithoutQuestionInput
@@ -428,7 +432,7 @@ export type QuestionCreateWithoutAnswersInput = {
 export type QuestionUncheckedCreateWithoutAnswersInput = {
   id?: string
   text: string
-  explanation: string
+  explanation?: string | null
   isActive?: boolean
   createdAt?: Date | string
   options?: Prisma.OptionUncheckedCreateNestedManyWithoutQuestionInput
@@ -453,7 +457,7 @@ export type QuestionUpdateToOneWithWhereWithoutAnswersInput = {
 export type QuestionUpdateWithoutAnswersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.OptionUpdateManyWithoutQuestionNestedInput
@@ -462,7 +466,7 @@ export type QuestionUpdateWithoutAnswersInput = {
 export type QuestionUncheckedUpdateWithoutAnswersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.StringFieldUpdateOperationsInput | string
-  explanation?: Prisma.StringFieldUpdateOperationsInput | string
+  explanation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.OptionUncheckedUpdateManyWithoutQuestionNestedInput
@@ -561,7 +565,7 @@ export type $QuestionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     text: string
-    explanation: string
+    explanation: string | null
     isActive: boolean
     createdAt: Date
   }, ExtArgs["result"]["question"]>
