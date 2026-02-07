@@ -41,7 +41,15 @@ router.get("/:attemptId", async (req, res) => {
       await fs.mkdir(certificatesDir, { recursive: true });
 
       certificatePath = path.join(certificatesDir, `${attemptId}.pdf`);
-      await generateCertificate(attempt.name, certificatePath);
+      await generateCertificate(
+        {
+          name: attempt.name,
+          score: attempt.score,
+          percentage: attempt.percentage,
+          date: attempt.createdAt,
+        },
+        certificatePath
+      );
 
       // Save certificate path to database
       await prisma.certificate.create({

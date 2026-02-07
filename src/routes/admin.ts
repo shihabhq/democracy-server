@@ -58,12 +58,7 @@ router.post("/questions", async (req, res) => {
   try {
     const { text, explanation, options } = req.body;
 
-    if (
-      !text ||
-      !explanation ||
-      !Array.isArray(options) ||
-      options.length < 2
-    ) {
+    if (!text || !Array.isArray(options) || options.length < 2) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -78,7 +73,7 @@ router.post("/questions", async (req, res) => {
     const question = await prisma.question.create({
       data: {
         text,
-        explanation,
+        explanation: explanation?.trim() || null,
         options: {
           create: options.map((opt: any) => ({
             text: opt.text,
@@ -123,7 +118,9 @@ router.put("/questions/:id", async (req, res) => {
       where: { id },
       data: {
         ...(text && { text }),
-        ...(explanation && { explanation }),
+        ...(explanation !== undefined && {
+          explanation: explanation?.trim() || null,
+        }),
         ...(isActive !== undefined && { isActive }),
         ...(options && {
           options: {
@@ -146,14 +143,16 @@ router.put("/questions/:id", async (req, res) => {
   }
 });
 
-// Delete a question
+// Delete a question (and its options and answers that reference it)
 router.delete("/questions/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    await prisma.question.delete({
-      where: { id },
-    });
+    await prisma.$transaction([
+      prisma.answer.deleteMany({ where: { questionId: id } }),
+      prisma.option.deleteMany({ where: { questionId: id } }),
+      prisma.question.delete({ where: { id } }),
+    ]);
 
     res.json({ message: "Question deleted successfully" });
   } catch (error) {
