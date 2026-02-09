@@ -133,6 +133,27 @@ router.get("/", async (req, res) => {
       averageScore: Math.round((row._avg.percentage ?? 0) * 100) / 100,
     }));
 
+    // Stats by gender
+    const attemptsByGender = await prisma.quizAttempt.groupBy({
+      by: ["gender"],
+      _count: { id: true },
+      _avg: { percentage: true },
+    });
+    const passedByGender = await prisma.quizAttempt.groupBy({
+      by: ["gender"],
+      where: { passed: true },
+      _count: { id: true },
+    });
+    const passedByGenderMap = new Map(
+      passedByGender.map((p) => [p.gender, p._count.id])
+    );
+    const statsByGender = attemptsByGender.map((row) => ({
+      gender: row.gender || "(not set)",
+      totalAttempts: row._count.id,
+      passedCount: passedByGenderMap.get(row.gender) ?? 0,
+      averageScore: Math.round((row._avg.percentage ?? 0) * 100) / 100,
+    }));
+
     res.json({
       totalAttempts,
       passedCount,
@@ -144,6 +165,7 @@ router.get("/", async (req, res) => {
       easiestQuestions,
       statsByDistrict,
       statsByAgeGroup,
+      statsByGender,
     });
   } catch (error) {
     console.error("Error fetching analytics:", error);
