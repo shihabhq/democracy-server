@@ -1,12 +1,45 @@
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const PAGE_WIDTH = 842; // A4 landscape
-const PAGE_HEIGHT = 595;
-const MARGIN = 60;
-const CONTENT_WIDTH = 520;
-const START_X = (PAGE_WIDTH - CONTENT_WIDTH) / 2;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// PNG dimensions are at offsets 16 (width) and 20 (height), big-endian
+function getPngDimensions(imagePath: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const stream = fs.createReadStream(imagePath);
+    const chunks: Buffer[] = [];
+    stream.on("data", (chunk: Buffer) => {
+      chunks.push(chunk);
+      if (Buffer.concat(chunks).length >= 24) {
+        stream.destroy();
+      }
+    });
+    stream.on("close", () => {
+      const buf = Buffer.concat(chunks);
+      if (buf.length < 24) {
+        reject(new Error("Invalid PNG or file too small"));
+        return;
+      }
+      const width = buf.readUInt32BE(16);
+      const height = buf.readUInt32BE(20);
+      resolve({ width, height });
+    });
+    stream.on("error", reject);
+  });
+}
+
+function getTemplateImagePath(): string {
+  // Prefer server assets (e.g. democracy-server/assets/certificate/image.png)
+  const serverAssets = path.join(__dirname, "../../assets/certificate/image.png");
+  if (fs.existsSync(serverAssets)) return serverAssets;
+  // Fallback for monorepo dev: client public folder
+  // const clientPublic = path.join(__dirname, "../../../democracy-client/public/certificate/image.png");
+  // if (fs.existsSync(clientPublic)) return clientPublic;
+  return serverAssets; // will throw when read
+}
 
 export type CertificateData = {
   name: string;
@@ -15,91 +48,56 @@ export type CertificateData = {
   date: Date;
 };
 
+// Name is placed below "Certificate of Participation" – slightly below center of that area
+const NAME_TOP_RATIO = 0.40;
+const NAME_FONT_SIZE_PT = 32;
+const NAME_COLOR = "#1a1a1a";
+
 export async function generateCertificate(
   data: CertificateData,
   outputPath: string
 ): Promise<void> {
+  const templatePath = getTemplateImagePath();
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(
+      `Certificate template not found. Please copy democracy-client/public/certificate/image.png to democracy-server/assets/certificate/image.png`
+    );
+  }
+
+  const { width: imgW, height: imgH } = await getPngDimensions(templatePath);
+  // PDF points: 72 per inch; assume image is 96 DPI so scale factor 72/96 = 0.75
+  const pageWidthPt = Math.round(imgW * 0.75);
+  const pageHeightPt = Math.round(imgH * 0.75);
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
-      size: "A4",
-      layout: "landscape",
-      margins: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN },
+      size: [pageWidthPt, pageHeightPt],
+      margin: 0,
+      autoFirstPage: true,
     });
 
     const stream = fs.createWriteStream(outputPath);
     doc.pipe(stream);
 
-    // Outer border (subtle)
-    const borderPadding = 36;
-    doc
-      .lineWidth(1)
-      .strokeColor("#333333")
-      .rect(borderPadding, borderPadding, PAGE_WIDTH - borderPadding * 2, PAGE_HEIGHT - borderPadding * 2)
-      .stroke();
-
-    // Inner border (decorative)
-    doc
-      .lineWidth(0.5)
-      .strokeColor("#888888")
-      .rect(44, 44, PAGE_WIDTH - 88, PAGE_HEIGHT - 88)
-      .stroke();
-
-    // Vertical starting position – flow from here
-    let y = 72;
-
-    // Title – single line or two, with measured height so next block doesn’t overlap
-    doc.fontSize(42).font("Helvetica-Bold").fillColor("#1a1a1a");
-    const title = "Certificate of Completion";
-    const titleHeight = doc.heightOfString(title, { width: CONTENT_WIDTH });
-    doc.text(title, START_X, y, { align: "center", width: CONTENT_WIDTH });
-    y += titleHeight + 16;
-
-    // Subtitle – quiz name
-    doc.fontSize(18).font("Helvetica").fillColor("#444444");
-    const subtitle = "Democracy Knowledge Quiz";
-    const subtitleHeight = doc.heightOfString(subtitle, { width: CONTENT_WIDTH });
-    doc.text(subtitle, START_X, y, { align: "center", width: CONTENT_WIDTH });
-    y += subtitleHeight + 40;
-
-    // Decorative line
-    const lineY = y;
-    doc
-      .strokeColor("#cccccc")
-      .lineWidth(0.75)
-      .moveTo(START_X, lineY)
-      .lineTo(START_X + CONTENT_WIDTH, lineY)
-      .stroke();
-    y += 36;
-
-    // Participant name
-    doc.fontSize(28).font("Helvetica-Bold").fillColor("#1a1a1a");
-    const nameHeight = doc.heightOfString(data.name, { width: CONTENT_WIDTH });
-    doc.text(data.name, START_X, y, { align: "center", width: CONTENT_WIDTH });
-    y += nameHeight + 20;
-
-    // Completion statement (one paragraph to avoid overlap)
-    doc.fontSize(15).font("Helvetica").fillColor("#333333");
-    const statement =
-      "has successfully completed the Democracy Knowledge Quiz with a passing score of 50% or higher.";
-    const statementHeight = doc.heightOfString(statement, { width: CONTENT_WIDTH });
-    doc.text(statement, START_X, y, { align: "center", width: CONTENT_WIDTH });
-    y += statementHeight + 16;
-
-    // Score line
-    doc.fontSize(14).font("Helvetica").fillColor("#555555");
-    const scoreText = `Score: ${data.score} (${Math.round(data.percentage)}%)`;
-    const scoreHeight = doc.heightOfString(scoreText, { width: CONTENT_WIDTH });
-    doc.text(scoreText, START_X, y, { align: "center", width: CONTENT_WIDTH });
-    y += scoreHeight + 48;
-
-    // Date – centered at bottom area
-    const dateStr = data.date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    // Full-page background: certificate template image
+    doc.image(templatePath, 0, 0, {
+      width: pageWidthPt,
+      height: pageHeightPt,
     });
-    doc.fontSize(12).font("Helvetica").fillColor("#666666");
-    doc.text(`Date: ${dateStr}`, START_X, y, { align: "center", width: CONTENT_WIDTH });
+
+    // User name below "Certificate of Participation" – centered, below the subtitle line
+    const nameY = pageHeightPt * NAME_TOP_RATIO;
+    const textWidth = pageWidthPt * 0.7;
+    const startX = (pageWidthPt - textWidth) / 2;
+
+    doc
+      .fontSize(NAME_FONT_SIZE_PT)
+      .font("Helvetica-Bold")
+      .fillColor(NAME_COLOR)
+      .text(data.name, startX, nameY, {
+        align: "center",
+        width: textWidth,
+      });
 
     doc.end();
 

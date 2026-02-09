@@ -10,6 +10,33 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
+// Preview certificate without a quiz attempt (e.g. ?name=Your Name)
+router.get("/preview", async (req, res) => {
+  try {
+    const name = (req.query.name as string) || "Preview Name";
+    const certificatesDir = path.join(__dirname, "../../certificates");
+    await fs.mkdir(certificatesDir, { recursive: true });
+    const certificatePath = path.join(certificatesDir, `preview-${Date.now()}.pdf`);
+    await generateCertificate(
+      {
+        name,
+        score: 20,
+        percentage: 100,
+        date: new Date(),
+      },
+      certificatePath
+    );
+    res.setHeader("Content-Disposition", `inline; filename="certificate-preview.pdf"`);
+    res.sendFile(path.resolve(certificatePath), (err) => {
+      fs.unlink(certificatePath).catch(() => {});
+      if (err) res.status(500).json({ error: "Failed to send certificate" });
+    });
+  } catch (error) {
+    console.error("Error generating certificate preview:", error);
+    res.status(500).json({ error: "Failed to generate certificate preview" });
+  }
+});
+
 // Generate and download certificate
 router.get("/:attemptId", async (req, res) => {
   try {
