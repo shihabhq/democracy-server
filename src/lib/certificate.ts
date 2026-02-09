@@ -9,18 +9,15 @@ const __dirname = path.dirname(__filename);
 // PNG dimensions are at offsets 16 (width) and 20 (height), big-endian
 function getPngDimensions(imagePath: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
-    const stream = fs.createReadStream(imagePath);
+    const stream = fs.createReadStream(imagePath, { start: 0, end: 23 });
     const chunks: Buffer[] = [];
     stream.on("data", (chunk: Buffer) => {
       chunks.push(chunk);
-      if (Buffer.concat(chunks).length >= 24) {
-        stream.destroy();
-      }
     });
-    stream.on("close", () => {
+    stream.on("end", () => {
       const buf = Buffer.concat(chunks);
       if (buf.length < 24) {
-        reject(new Error("Invalid PNG or file too small"));
+        reject(new Error(`Invalid PNG or file too small (got ${buf.length} bytes)`));
         return;
       }
       const width = buf.readUInt32BE(16);
@@ -31,14 +28,14 @@ function getPngDimensions(imagePath: string): Promise<{ width: number; height: n
   });
 }
 
+/** Only source: democracy-server/assets/certificate/image.png (relative to this file). */
 function getTemplateImagePath(): string {
-  // Prefer server assets (e.g. democracy-server/assets/certificate/image.png)
-  const serverAssets = path.join(__dirname, "../../assets/certificate/image.png");
-  if (fs.existsSync(serverAssets)) return serverAssets;
-  // Fallback for monorepo dev: client public folder
-  // const clientPublic = path.join(__dirname, "../../../democracy-client/public/certificate/image.png");
-  // if (fs.existsSync(clientPublic)) return clientPublic;
-  return serverAssets; // will throw when read
+  const templatePath = path.join(__dirname, "../../assets/certificate/image.png");
+  const resolved = path.resolve(templatePath);
+  if (!fs.existsSync(resolved)) {
+    throw new Error(`Certificate template not found at: ${resolved}`);
+  }
+  return resolved;
 }
 
 export type CertificateData = {
@@ -57,17 +54,38 @@ export async function generateCertificate(
   data: CertificateData,
   outputPath: string
 ): Promise<void> {
-  const templatePath = getTemplateImagePath();
-  if (!fs.existsSync(templatePath)) {
-    throw new Error(
-      `Certificate template not found. Please copy democracy-client/public/certificate/image.png to democracy-server/assets/certificate/image.png`
-    );
+  let templatePathResolved: string;
+  try {
+    templatePathResolved = getTemplateImagePath();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Template: ${msg}`);
   }
 
-  const { width: imgW, height: imgH } = await getPngDimensions(templatePath);
+  let imgW: number;
+  let imgH: number;
+  try {
+    const dims = await getPngDimensions(templatePathResolved);
+    imgW = dims.width;
+    imgH = dims.height;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`PNG dimensions: ${msg}`);
+  }
+  if (!imgW || !imgH || imgW > 10000 || imgH > 10000) {
+    throw new Error(
+      `Invalid PNG dimensions: ${imgW}x${imgH}. File may not be a valid PNG.`
+    );
+  }
   // PDF points: 72 per inch; assume image is 96 DPI so scale factor 72/96 = 0.75
   const pageWidthPt = Math.round(imgW * 0.75);
   const pageHeightPt = Math.round(imgH * 0.75);
+
+  const outputPathResolved = path.resolve(outputPath);
+  const outputDir = path.dirname(outputPathResolved);
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
@@ -76,14 +94,20 @@ export async function generateCertificate(
       autoFirstPage: true,
     });
 
-    const stream = fs.createWriteStream(outputPath);
+    const stream = fs.createWriteStream(outputPathResolved);
     doc.pipe(stream);
 
-    // Full-page background: certificate template image
-    doc.image(templatePath, 0, 0, {
-      width: pageWidthPt,
-      height: pageHeightPt,
-    });
+    try {
+      // Full-page background: certificate template image (use resolved path for Windows)
+      doc.image(templatePathResolved, 0, 0, {
+        width: pageWidthPt,
+        height: pageHeightPt,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      reject(new Error(`PDF image: ${msg}`));
+      return;
+    }
 
     // User name below "Certificate of Participation" – centered, below the subtitle line
     const nameY = pageHeightPt * NAME_TOP_RATIO;
@@ -102,6 +126,9 @@ export async function generateCertificate(
     doc.end();
 
     stream.on("finish", () => resolve());
-    stream.on("error", reject);
+    stream.on("error", (e) => {
+      const msg = e instanceof Error ? e.message : String(e);
+      reject(new Error(`PDF write: ${msg}`));
+    });
   });
 }

@@ -101,6 +101,7 @@ export const QuizAttemptScalarFieldEnum = {
   name: 'name',
   district: 'district',
   ageGroup: 'ageGroup',
+  gender: 'gender',
   score: 'score',
   percentage: 'percentage',
   passed: 'passed',

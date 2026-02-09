@@ -42,6 +42,7 @@ model QuizAttempt {
   name     String
   district String
   ageGroup String
+  gender   String  @default("")
 
   score      Int
   percentage Float

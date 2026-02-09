@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import path from "path";
+import { existsSync } from "fs";
 
 //routes
 import quizRoutes from "./routes/quiz.js";

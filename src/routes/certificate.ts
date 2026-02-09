@@ -4,11 +4,23 @@ import { generateCertificate } from "../lib/certificate.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs/promises";
+import { existsSync } from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+
+// Debug: verify template path (open http://localhost:5000/api/certificate/check in browser)
+router.get("/check", (req, res) => {
+  const templatePath = path.resolve(path.join(__dirname, "../../assets/certificate/image.png"));
+  const exists = existsSync(templatePath);
+  res.json({
+    templatePath,
+    exists,
+    message: exists ? "Template found." : "Template NOT found. Put image.png in democracy-server/assets/certificate/",
+  });
+});
 
 // Preview certificate without a quiz attempt (e.g. ?name=Your Name)
 router.get("/preview", async (req, res) => {
@@ -32,8 +44,12 @@ router.get("/preview", async (req, res) => {
       if (err) res.status(500).json({ error: "Failed to send certificate" });
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Error generating certificate preview:", error);
-    res.status(500).json({ error: "Failed to generate certificate preview" });
+    res.status(500).json({
+      error: "Failed to generate certificate preview",
+      details: message,
+    });
   }
 });
 
@@ -62,11 +78,11 @@ router.get("/:attemptId", async (req, res) => {
     // Check if certificate already exists
     let certificatePath = attempt.certificate?.filePath;
 
-    if (!certificatePath) {
-      // Generate certificate
-      const certificatesDir = path.join(__dirname, "../../certificates");
-      await fs.mkdir(certificatesDir, { recursive: true });
+    const certificatesDir = path.join(__dirname, "../../certificates");
+    await fs.mkdir(certificatesDir, { recursive: true });
+    console.log(certificatePath)
 
+    if (!certificatePath) {
       certificatePath = path.join(certificatesDir, `${attemptId}.pdf`);
       await generateCertificate(
         {
@@ -77,21 +93,50 @@ router.get("/:attemptId", async (req, res) => {
         },
         certificatePath
       );
-
-      // Save certificate path to database
       await prisma.certificate.create({
         data: {
           attemptId: attempt.id,
           filePath: certificatePath,
         },
       });
+    } else {
+      // If record exists but file is missing (e.g. after deploy), regenerate
+      try {
+        await fs.access(certificatePath);
+      } catch {
+        certificatePath = path.join(certificatesDir, `${attemptId}.pdf`);
+        await generateCertificate(
+          {
+            name: attempt.name,
+            score: attempt.score,
+            percentage: attempt.percentage,
+            date: attempt.createdAt,
+          },
+          certificatePath
+        );
+        await prisma.certificate.update({
+          where: { attemptId: attempt.id },
+          data: { filePath: certificatePath },
+        });
+      }
     }
 
-    // Send the PDF file
-    res.sendFile(path.resolve(certificatePath));
+    const absolutePath = path.resolve(certificatePath);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="certificate.pdf"`);
+    res.sendFile(absolutePath);
   } catch (error) {
-    console.error("Error generating certificate:", error);
-    res.status(500).json({ error: "Failed to generate certificate" });
+    const err = error instanceof Error ? error : new Error(String(error));
+    const message = err.message;
+    console.log(error)
+    // Always show the real error in the response body (so you see it in the browser)
+    const errorText = `Failed to generate certificate: ${message}`;
+    console.error("\n[CERTIFICATE ERROR]", errorText);
+    if (err.stack) console.error(err.stack);
+    res.status(500).json({
+      error: errorText,
+      details: message,
+    });
   }
 });
 

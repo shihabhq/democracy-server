@@ -41,13 +41,14 @@ router.get("/questions", async (req, res) => {
 });
 
 const AGE_GROUPS = ["18-25", "26-40", "41-50", "50+"] as const;
+const GENDERS = ["Male", "Female", "Other", "Prefer not to say"] as const;
 
 // Submit quiz attempt
 router.post("/attempt", async (req, res) => {
   try {
-    const { name, district, ageGroup, answers } = req.body;
+    const { name, district, ageGroup, gender, answers } = req.body;
 
-    if (!name || !district || !ageGroup || !Array.isArray(answers)) {
+    if (!name || !district || !ageGroup || !gender || !Array.isArray(answers)) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -55,6 +56,12 @@ router.post("/attempt", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Invalid age group. Must be one of: 18-25, 26-40, 41-50, 50+" });
+    }
+
+    if (!GENDERS.includes(gender)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid gender. Must be one of: Male, Female, Other, Prefer not to say" });
     }
 
     // Validate that we have 20 answers
@@ -101,6 +108,7 @@ router.post("/attempt", async (req, res) => {
         name,
         district,
         ageGroup,
+        gender,
         score,
         percentage,
         passed,
@@ -195,6 +203,7 @@ router.get("/attempt/:id", async (req, res) => {
       name: attempt.name,
       district: attempt.district,
       ageGroup: attempt.ageGroup,
+      gender: attempt.gender,
       score: attempt.score,
       percentage: attempt.percentage,
       passed: attempt.passed,
