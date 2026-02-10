@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import path from "path";
 import { existsSync } from "fs";
 
@@ -11,8 +11,6 @@ import certificateRoutes from "./routes/certificate.js";
 import analyticsRoutes from "./routes/analytics.js";
 import adminRoutes from "./routes/admin.js";
 
-dotenv.config();
-
 const app = express();
 
 app.use(
@@ -20,6 +18,10 @@ app.use(
       origin: [
       "https://www.votekori.cloud",
       "https://admin.votekori.cloud",
+      "https://votekori.cloud",
+      "https://www.votekori.com",
+      "https://admin.votekori.com",
+      "https://votekori.com",
       "http://localhost:3000",
       "http://localhost:3001",
     ],
